@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Diary Online</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+        }
+
+        header {
+            background-color: #333;
+            padding: 10px;
+            text-align: center;
+            color: white;
+        }
+
+        .container {
+            margin: 20px;
+            padding: 20px;
+            background-color: white;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        #post-form {
+            display: none;
+            margin-bottom: 20px;
+        }
+
+        #post-btn {
+            background-color: #00aced;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            cursor: pointer;
+            width: 100%;
+        }
+
+        #post-title {
+            margin-bottom: 10px;
+            width: 100%;
+        }
+
+        #post-content {
+            width: 100%;
+        }
+
+        #post-list {
+            list-style: none;
+            padding: 0;
+        }
+
+        .post {
+            background-color: #fff;
+            border: 1px solid #ddd;
+            padding: 10px;
+            margin-bottom: 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            position: relative;
+        }
+
+        .post .delete-btn {
+            background-color: #ff6666;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            margin-top: 5px;
+            cursor: pointer;
+        }
+
+        .post-title {
+            font-size: 1.5em;
+            margin-bottom: 5px;
+        }
+
+        .post-content {
+            display: none;
+            margin-top: 10px;
+        }
+
+        .timestamp {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            font-size: 0.8em;
+            color: #666;
+        }
+
+        .show-diary-btn {
+            background-color: #00aced;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            cursor: pointer;
+            margin-right: 10px;
+        }
+    </style>
+    <script src="https://cdn.tiny.cloud/1/no-api-key/tinymce/5/tinymce.min.js" referrerpolicy="origin"></script>
+    <script>
+        tinymce.init({
+            selector: '#post-content',
+            height: 300,
+            plugins: 'autolink lists link image charmap print preview hr anchor pagebreak',
+            toolbar: 'undo redo | formatselect | bold italic underline strikethrough | alignleft aligncenter alignright alignjustify | outdent indent | link image',
+            toolbar_mode: 'floating',
+            tinycomments_mode: 'embedded',
+            tinycomments_author: 'Author name',
+        });
+    </script>
+</head>
+<body>
+
+    <header>
+        <h1>Diary Online</h1>
+    </header>
+
+    <div class="container">
+        <button id="post-btn" onclick="togglePostForm()">Buat Diary</button>
+
+        <form id="post-form">
+            <label for="post-title">Judul Diary:</label>
+            <input type="text" id="post-title" name="postTitle" required>
+            <br>
+            <label for="post-content">Mari tuliskan ceritamu! :</label>
+            <textarea id="post-content" name="postContent" rows="4" required></textarea>
+            <br>
+            <button type="button" onclick="submitPost()">Post</button>
+        </form>
+
+        <ul id="post-list"></ul>
+    </div>
+
+    <script>
+        function togglePostForm() {
+            var postForm = document.getElementById('post-form');
+            postForm.style.display = (postForm.style.display === 'none' || postForm.style.display === '') ? 'block' : 'none';
+        }
+
+        function submitPost() {
+            var postTitle = document.getElementById('post-title').value;
+            var postContent = tinymce.get('post-content').getContent();
+
+            if (postTitle.trim() !== '' && postContent.trim() !== '') {
+                var postList = document.getElementById('post-list');
+                var newPost = document.createElement('li');
+                newPost.className = 'post';
+
+                var title = document.createElement('p');
+                title.className = 'post-title';
+                title.textContent = postTitle;
+                newPost.appendChild(title);
+
+                var timestamp = document.createElement('p');
+                timestamp.className = 'timestamp';
+                timestamp.textContent = new Date().toLocaleString();
+                newPost.appendChild(timestamp);
+
+                var content = document.createElement('div');
+                content.className = 'post-content';
+                content.innerHTML = postContent;
+                newPost.appendChild(content);
+
+                var showDiaryButton = document.createElement('button');
+                showDiaryButton.className = 'show-diary-btn';
+                showDiaryButton.textContent = 'Tampilkan Diary';
+                showDiaryButton.onclick = function() {
+                    content.style.display = (content.style.display === 'none' || content.style.display === '') ? 'block' : 'none';
+                };
+                newPost.appendChild(showDiaryButton);
+
+                var deleteButton = document.createElement('button');
+                deleteButton.className = 'delete-btn';
+                deleteButton.textContent = 'Hapus';
+                deleteButton.onclick = function() {
+                    postList.removeChild(newPost);
+                };
+                newPost.appendChild(deleteButton);
+
+                postList.appendChild(newPost);
+
+                // Bersihkan formulir
+                document.getElementById('post-title').value = '';
+                tinymce.get('post-content').setContent('');
+
+                // Sembunyikan formulir setelah posting
+                document.getElementById('post-form').style.display = 'none';
+            }
+        }
+
+        // Menangani 'Enter' pada textarea untuk langsung posting
+        document.getElementById('post-content').addEventListener('keydown', function(e) {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault(); // Mencegah newline saat menekan Enter
+                submitPost();
+            }
+        });
+    </script>
+
+</body>
+</html>
